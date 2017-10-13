@@ -1,0 +1,63 @@
+%%Problem 1
+% Write a MATLAB script that produces
+% Figure 2.1 using the Bisection Method.
+
+clear all; close all;
+
+%Set up required functions
+g =@(x) log(x)./(1+x);
+gp =@(x) (1+1./x-log(x))./(1+x).^2;
+
+%Set up parameters and starting values
+a = 1;
+b = 5;
+y(1) = (a+b)/2;
+i=1;
+
+%Bisection Method to find root of gp(x) using 
+%relative convergence criterion.
+
+while true
+    if gp(y(i))*gp(a)<0
+        b = y(i);
+    else
+        a = y(i);
+    end
+    y(i+1) = (a+b)/2;
+    if abs(y(i+1)-y(i))/abs(y(i)) > eps
+        i = i + 1;
+    else
+        break
+    end
+end
+
+%% Plot
+
+%Plot g(x)
+hold on
+x1 = linspace(1,5,100);
+y1 = g(x1);
+plot(x1,y1,'k-','LineWidth',1);
+
+%Plot vertical line at x^*
+X = [y(end) y(end)];
+Y = [-0.01 0.31];
+line(X,Y,'Color','black','LineStyle','--')
+
+%Add axis labels and set axis limits
+xlabel('$x$','Interpreter','Latex','fontsize',12)
+ylabel('$g(x)$','Interpreter','Latex','fontsize',12)
+axis([0.8 5.2 -0.01 0.31])
+
+%Set tick marks on the axes
+set(gca,'xtick',[1 2 3 4 5])
+set(gca,'ytick',[0 0.1 0.2 0.3],'yticklabel',[0 0.1 0.2 0.3])
+set(gca,'TickDir','out')
+set(gca, 'box', 'off')
+
+%Plot the max of g(x), g(x^*)
+plot(y(end),g(y(end)),'o','MarkerEdgeColor','none','MarkerFaceColor','k')
+
+%Label the vertical line of max, x^*
+h=text(3.4,0.03, '$x^*\approx 3.59112$','Interpreter','Latex','fontsize',12);
+set(h,'rotation',90)
