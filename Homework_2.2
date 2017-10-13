@@ -1,0 +1,152 @@
+%% Problem 2.2a
+clear all; close all;
+
+%Graph log likelihood function
+%Set up parameters and starting values
+x = [3.91, 4.85, 2.28, 4.06, 3.7, 4.04, 5.46, 3.53, 2.28, 1.96,...
+    2.53, 3.88, 2.22, 3.47, 4.82, 2.46, 2.99, 2.54, 0.52, 2.5];
+n = 500;
+tht = linspace(-pi,pi,n);
+
+%Initialize and compute log likelihood function
+l1 = zeros(n,1);
+for i =1:n
+    l1(i) = -20*log(2*pi)+sum(log(1-cos(x-tht(i))));
+end
+
+%Plot the log likelihood function
+figure,
+hold on
+plot(tht, l1, 'k-','LineWidth',1);
+
+%Axis labels, title, and limits
+xlabel('$\theta$','Interpreter','Latex','fontsize',12)
+ylabel('$\ell(\theta)$','Interpreter','Latex','fontsize',12)
+title('2.2a Log Likelihood Function');
+axis([-pi pi -95 -30])
+
+%% Problem 2.2c
+
+%Find the MLE for theta using Newton-Raphson Method
+
+%Set up required functions, h(theta)=l'(theta)/l''(theta)
+l = @(theta) -20*log(2*pi)+sum(log(1-cos(x-theta)));
+lp = @(theta) -sum(cot((x-theta)/2));
+lpp = @(theta) -(1/2)*sum((csc((x-theta)/2)).^2);
+h = @(theta) lp(theta)./lpp(theta);
+
+%Newton-Raphson Method using relative convergence criterion for 
+%starting points 0.05844, -2.7, and 2.7.
+%Note, I am forcing the process to stop if the convergence
+%criterion is not met by 100 iterations.
+epsilon = 1e-6;
+tht1(1) = 0.05844;
+i=1;
+while i < 101
+    tht1(i+1) = tht1(i)-h(tht1(i));
+    if abs(tht1(i+1)-tht1(i))/abs(tht1(i)) > epsilon
+        i = i + 1;
+    else
+        break
+    end
+end
+
+tht2(1) = -2.7;
+i=1;
+while i < 101
+    tht2(i+1) = tht2(i)-h(tht2(i));
+    if abs(tht2(i+1)-tht2(i))/abs(tht2(i)) > epsilon
+        i = i + 1;
+    else
+        break
+    end
+end
+
+tht3(1) = 2.7;
+i=1;
+while i < 101
+    tht3(i+1) = tht3(i)-h(tht3(i));
+    if abs(tht3(i+1)-tht3(i))/abs(tht3(i)) > epsilon
+        i = i + 1;
+    else
+        break
+    end
+end
+
+%Plot of converged values
+plot(tht1(end),l(tht1(end)),'o','MarkerEdgeColor','black','MarkerFaceColor','r')
+plot(tht2(end),l(tht2(end)),'o','MarkerEdgeColor','black','MarkerFaceColor','r')
+plot(tht3(end),l(tht3(end)),'o','MarkerEdgeColor','black','MarkerFaceColor','r')
+hold off
+
+%% Problem 2.2d
+
+%Find and plot sets of attraction
+%using Newton-Raphson method
+tht_start = linspace(-pi,pi,200);
+tht_end = zeros(1,200);
+
+for j = 1:200
+    i=1;
+    tht_temp(i) = tht_start(j);
+    while i < 101
+        tht_temp(i+1) = tht_temp(i)-h(tht_temp(i));
+        if abs(tht_temp(i+1)-tht_temp(i))/abs(tht_temp(i)) > epsilon
+            i = i + 1;
+        else
+            tht_end(j) = tht_temp(end);
+            tht_temp = (0);
+            break
+        end
+    end
+end
+
+%Plot of starting theta values against converged values
+figure,
+hold on
+plot(tht_start,tht_end,'-k')
+plot(tht_start,tht_end,'o','MarkerEdgeColor','black','MarkerFaceColor','r')
+hold off
+
+%Axis labels, title, and limits
+xlabel('$\theta^{(0)}$','Interpreter','Latex','fontsize',12)
+ylabel('$\hat{\theta}$','Interpreter','Latex','fontsize',12)
+title('2.2d Sets of Attraction');
+
+%Stem Plot of starting theta values against converged values
+figure,
+stem(tht_start,tht_end);
+
+%Axis labels, title, and limits
+xlabel('$\theta^{(0)}$','Interpreter','Latex','fontsize',12)
+ylabel('$\hat{\theta}$','Interpreter','Latex','fontsize',12)
+title('2.2d Sets of Attraction');
+
+%% Problem 2.2e
+
+%Trial and error approach to finding 
+%close theta^0 values that converge to
+%different theta
+
+epsilon = 1e-6;
+tht4(1) = -2.3;
+i=1;
+while i < 101
+    tht4(i+1) = tht4(i)-h(tht4(i));
+    if abs(tht4(i+1)-tht4(i))/abs(tht4(i)) > epsilon
+        i = i + 1;
+    else
+        break
+    end
+end
+
+tht5(1) = -2.297;
+i=1;
+while i < 101
+    tht5(i+1) = tht5(i)-h(tht5(i));
+    if abs(tht5(i+1)-tht5(i))/abs(tht5(i)) > epsilon
+        i = i + 1;
+    else
+        break
+    end
+end
