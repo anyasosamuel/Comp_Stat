@@ -1,0 +1,35 @@
+%% Guass_Newton Method
+%% Question(a)
+clear all; close all;
+
+t = [0 8 28 41 63 79 97 117 135 154]';	%time
+y = [2 47 192 256 768 896 1120 896 1184 1024]';	%the population size
+
+f =@(r, k) (k*y(1))./((y(1) + ((k-y(1))*exp(-r*t))));  %vector function
+
+e =@(r,k) (y - f(r,k)); %Residual vector
+g =@(r,k) ((e(r,k)')*(e(r,k)))/2;
+
+dfr =@(r,k) (f(r,k).^2).*((t*(k-y(1,1)).*exp(-r*t))/(k*y(1,1))); %Partial derivative of the funtion wrt r
+dfk =@(r,k) (f(r,k).^2).*((1-exp(-r*t))/(k^2));  %Partial derivative of the funtion wrt k
+j =@(r,k) [dfr(r,k),dfk(r,k)];  %the Jacobian matrix
+
+
+
+%% Implementing the Gauss-Newton Update
+% tt = zeros(2,101);
+
+tt(:,1) = [0.1; 1024]; %Starting values
+
+i=1;
+while i<101
+    %tt(:,i+1) = tt(:,i) + ((inv(((j(tt(1,i),tt(2,i))')*j(tt(1,i),tt(2,i)))))*(j(tt(1,i),tt(2,i))')*e(tt(1,i),tt(2,i)));
+    tt(:,i+1) = tt(:,i) + (j(tt(1,i),tt(2,i))\e(tt(1,i),tt(2,i)));
+    if norm(tt(:,i+1) - tt(:,i))>1e-6
+        i=i+1;
+        %display(i)
+        %display(g(tt(1,i),tt(2,i)))
+    else
+        break
+    end
+end
