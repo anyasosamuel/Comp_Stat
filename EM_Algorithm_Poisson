@@ -1,0 +1,31 @@
+clear all; close all;
+%% Implementing EM Algorithm for Mixture of two Poisson Distributions
+
+
+
+k = 0:9;    %Builds a vector with sequence of 0 to 9, one increment
+x = [162 267 271 185 111 61 27 8 3 1];
+
+%% Implementing the M Step
+p(1) = 0.3;
+l1(1) = 1;
+l2(1) = 3;
+
+for i=1:2000
+    %The Expectation Step
+    poiss2mixpmf(:,i) =(x).*((p(i).*poisspdf(k,l1(i)))./((p(i).*poisspdf(k,l1(i)))+((1-p(i)).*poisspdf(k,l2(i)))));    %mixture of two poisson PMF
+    %The Maximization Step - The Updating Function
+    p(i+1) = sum(poiss2mixpmf(:,i))./sum(x);
+    l1(i+1) = sum(poiss2mixpmf(:,i).*k')./sum(poiss2mixpmf(:,i));
+    l2(i+1) = sum((x'-poiss2mixpmf(:,i)).*k')./sum((x'-poiss2mixpmf(:,i)));
+    if (norm(p(i+1)-p(i)) + norm(l1(i+1)-l1(i)) + norm(l2(i+1)-l2(i)))/(norm(p(i))+norm(l1(i))+norm(l2(i)))>1.0e-6
+        r(i+1)=(norm(p(i+1)-p(i)) + norm(l1(i+1)-l1(i)) + norm(l2(i+1)-l2(i)))/(norm(p(i))+norm(l1(i))+norm(l2(i)));
+        dp(i+1) = (p(i+1)-(0.360))/(p(i)-(0.360));
+        dl1(i+1) = (l1(i+1)-(1.256))/(l1(i)-(1.256));
+        dl2(i+1) = (l2(i+1)-(2.663))/(l2(i)-(2.663));
+        i=i+1;
+    else
+        break
+    end
+end
+
