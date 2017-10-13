@@ -1,0 +1,55 @@
+%% Question 2.6c(2)
+clear all; close all;
+
+t = [0 8 28 41 63 79 97 117 135 154]';	%time
+y = [2 47 192 256 768 896 1120 896 1184 1024]';	%the population size
+
+
+f =@(r, k) (k*y(1))./((y(1) + ((k-y(1))*exp(-r*t))));  %vector function
+d =@(r,k) log(y) - log(f(r,k)); %Residual vector
+g =@(r,k) ((e(r,k)')*(e(r,k)))/2;   %g(?)
+dfr =@(t,r,k) (f(r,k).^2).*((t*(k-y(1,1)).*exp(-r*t))/(k*y(1,1))); %Partial derivative of the funtion wrt r
+dfk =@(t,r,k) (f(r,k).^2).*((1-exp(-r*t))/(k^2));  %Partial derivative of the funtion wrt k
+b1=@(r,k) dfr(t,r,k)./f(r,k);
+b2=@(r,k) dfk(t,r,k)./f(r,k);
+
+b =@(r,k) [b1(r,k), b2(r,k)];  %the Jacobian matrix for the log funtion
+
+hr =@(r,k) -b(r,k)'*d(r,k);  %the gradient of h
+
+fi = @(t,r,k) (k*y(1))./(y(1) + ((k-y(1))*exp(-r*t))); 
+di =@(y,t,r,k) log(y) - log(fi(t,r,k));  %Residual vector
+
+% ei =@(y,t,r,k) y - fi(t,r,k);
+
+
+ddeddr = @(t,r,k) -(fi(t,r,k).^2).*((t.^2)*(k-y(1)).*exp(-r*t)/(k*y(1))).*(((2*fi(t,r,k)).*(((k-y(1)).*exp(-r*t))/(k*y(1))))-1);
+ddddrr=@(t,r,k) (1./(fi(t,r,k).^2)).*(dfr(t,r,k).^2)-((1./(fi(t,r,k))).*(-ddeddr(t,r,k)));   %d11
+
+ddedrdk = @(t,r,k) -(fi(t,r,k).^2).*((t.*exp(-r*t))/(k^2)).*(((2*fi(t,r,k)).*((k-y(1)).*(1-exp(-r.*t))/(k*y(1))))+1);
+ddddrdk=@(t,r,k) ((1./(fi(t,r,k).^2)).*(dfr(t,r,k).*dfk(t,r,k)))-((1./fi(t,r,k)).*(-ddedrdk(t,r,k)));   %d12
+
+ddeddk =@(t,r,k) (-2*(fi(t,r,k).^2).*((1-exp(-r*t))/(k^3))).*((2*fi(t,r,k).*((1-exp(-r*t))/k))-1);
+ddddkk=@(t,r,k) ((1./(fi(t,r,k).^2)).*(dfk(t,r,k).^2))-((1./fi(t,r,k)).*(-ddeddk(t,r,k)));  %d22
+
+d1=@(y,t,r,k) sum(ddddrr(t,r,k).*di(y,t,r,k));
+d2=@(y,t,r,k) sum(ddddrdk(t,r,k).*di(y,t,r,k));
+d3=@(y,t,r,k) sum(ddddkk(t,r,k).*di(y,t,r,k));
+dd=@(y,t,r,k) [d1(y,t,r,k) d2(y,t,r,k); d2(y,t,r,k) d3(y,t,r,k)];
+ddd=@(r,k) dd(y,t,r,k);
+hgr=@(r,k) b(r,k)'*b(r,k) + ddd(r,k);   %the Hessian Matrix
+
+%% Implementing the Newton-Raphson Update
+tt(:,1) = [0.1; 1024]; %Starting values
+
+i=1;
+while i<101
+    tt(:,i+1) = tt(:,i) - (inv(hgr(tt(1,i),tt(2,i))))*hr(tt(1,i),tt(2,i));
+    if norm(tt(:,i+1) - tt(:,i))>1e-6
+        i=i+1;
+        %display(i)
+        %display(g(tt(1,i),tt(2,i)))
+    else
+        break
+    end
+end
