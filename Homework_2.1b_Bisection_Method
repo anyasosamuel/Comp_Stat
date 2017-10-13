@@ -1,0 +1,133 @@
+%% Problem 2.1b
+clear all; close all;
+
+%Initialize and compute log likelihood function for plotting
+x = [1.77, -0.23, 2.76, 3.80, 3.47, 56.75, -1.34, 4.24, -2.44, 3.29, ...
+    3.71, -2.40, 4.53, -0.07, -1.05, -13.87, -2.53, -1.75, 0.27, 43.21];
+n = 500;
+tht1 = linspace(-65,65,n);
+l1 = zeros(n,1);
+for i =1:n
+    l1(i) = -20*log(pi)-sum(log(1+(x-tht1(i)).^2));
+end
+
+%Apply bisection method
+%Set up required functions
+l = @(theta) -20*log(pi)-sum(log(1+(x-theta).^2));
+lp = @(theta) sum(2*(x-theta)./(1+(x-theta).^2));
+
+%% Run 1
+%Set up parameters and starting values
+a = -1;
+b = 1;
+tht2(1) = (a+b)/2;
+i=1;
+epsilon = 1e-6;
+
+%Bisection Method using relative convergence criterion.
+%Note, I am forcing the process to stop if the convergence
+%criterion is not met by 100 iterations.
+while i < 101
+    if lp(tht2(i))*lp(a)<0
+        b = tht2(i);
+    else
+        a = tht2(i);
+    end
+    tht2(i+1) = (a+b)/2;
+    if abs(tht2(i+1)-tht2(i))/abs(tht2(i)) > epsilon
+        i = i + 1;
+    else
+        break
+    end
+end
+
+%% Plot the log likelihood function
+plot(tht1, l1, 'k-','LineWidth',1);
+hold on
+
+%Axis labels, title, and limits
+xlabel('$\theta$','Interpreter','Latex','fontsize',12)
+ylabel('$\ell(\theta)$','Interpreter','Latex','fontsize',12)
+title('2.1b Log Likelihood Function, Run 1');
+axis([-65 65 -200 -60])
+
+%Plot result of biseciton method
+plot(tht2(end),l(tht2(end)),'o','MarkerEdgeColor','black','MarkerFaceColor','r')
+hold off
+%% Run 2
+%Set up parameters and starting values
+a = -1;
+b = 6;
+tht3(1) = (a+b)/2;
+i=1;
+epsilon = 1e-6;
+
+%Bisection Method using relative convergence criterion.
+%Note, I am forcing the process to stop if the convergence
+%criterion is not met by 100 iterations.
+while i < 101
+    if lp(tht3(i))*lp(a)<0
+        b = tht3(i);
+    else
+        a = tht3(i);
+    end
+    tht3(i+1) = (a+b)/2;
+    if abs(tht3(i+1)-tht3(i))/abs(tht3(i)) > epsilon
+        i = i + 1;
+    else
+        break
+    end
+end
+
+%% Plot the log likelihood function
+plot(tht1, l1, 'k-','LineWidth',1);
+hold on
+
+%Axis labels, title, and limits
+xlabel('$\theta$','Interpreter','Latex','fontsize',12)
+ylabel('$\ell(\theta)$','Interpreter','Latex','fontsize',12)
+title('2.1b Log Likelihood Function, Run 2');
+axis([-65 65 -200 -60])
+
+%Plot result of biseciton method
+plot(tht3(end),l(tht3(end)),'o','MarkerEdgeColor','black','MarkerFaceColor','r')
+hold off
+
+%% Run 3
+%Set up parameters and starting values
+a = -2;
+b = 6;
+tht4(1) = (a+b)/2;
+i=1;
+epsilon = 1e-6;
+
+%Bisection Method using relative convergence criterion.
+%Note, I am forcing the process to stop if the convergence
+%criterion is not met by 100 iterations.
+while i < 101
+    if lp(tht4(i))*lp(a)<0
+        b = tht4(i);
+    else
+        a = tht4(i);
+    end
+    tht4(i+1) = (a+b)/2;
+    if abs(tht4(i+1)-tht4(i))/abs(tht4(i)) > epsilon
+        i = i + 1;
+    else
+        break
+    end
+end
+
+%% Plot the log likelihood function
+plot(tht1, l1, 'k-','LineWidth',1);
+hold on
+
+%Axis labels, title, and limits
+xlabel('$\theta$','Interpreter','Latex','fontsize',12)
+ylabel('$\ell(\theta)$','Interpreter','Latex','fontsize',12)
+title('2.1b Log Likelihood Function, Run 3');
+axis([-65 65 -200 -60])
+
+%Plot result of biseciton method
+plot(tht4(end),l(tht4(end)),'o','MarkerEdgeColor','black','MarkerFaceColor','r')
+hold off
