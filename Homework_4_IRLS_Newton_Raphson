@@ -1,0 +1,45 @@
+%% Question 2.6b
+clear all; close all;
+
+t = [0 8 28 41 63 79 97 117 135 154]';	%time
+y = [2 47 192 256 768 896 1120 896 1184 1024]';	%the population size
+
+
+f =@(r, k) (k*y(1))./((y(1) + ((k-y(1))*exp(-r*t))));  %vector function
+e =@(r,k) (y - f(r,k)); %Residual vector
+g =@(r,k) ((e(r,k)')*(e(r,k)))/2;   %g(?)
+dfr =@(r,k) (f(r,k).^2).*((t*(k-y(1,1)).*exp(-r*t))/(k*y(1,1))); %Partial derivative of the funtion wrt r
+dfk =@(r,k) (f(r,k).^2).*((1-exp(-r*t))/(k^2));  %Partial derivative of the funtion wrt k
+j =@(r,k) [dfr(r,k),dfk(r,k)];  %the Jacobian matrix
+
+gr =@(r,k) -j(r,k)'*e(r,k);  %the gradient of g(?)
+
+fi = @(t,r,k) (k*y(1))./(y(1) + ((k-y(1))*exp(-r*t))); 
+
+ei =@(y,t,r,k) y - fi(t,r,k);
+
+
+ddeddr = @(t,r,k) -(fi(t,r,k).^2).*((t.^2)*(k-y(1)).*exp(-r*t)/(k*y(1))).*(((2*fi(t,r,k)).*(((k-y(1)).*exp(-r*t))/(k*y(1))))-1);
+ddedrdk = @(t,r,k) -(fi(t,r,k).^2).*((t.*exp(-r*t))/(k^2)).*(((2*fi(t,r,k)).*((k-y(1)).*(1-exp(-r.*t))/(k*y(1))))+1);
+ddeddk =@(t,r,k) (-2*(fi(t,r,k).^2).*((1-exp(-r*t))/(k^3))).*((2*fi(t,r,k).*((1-exp(-r*t))/k))-1);
+ee1=@(y,t,r,k) sum(ddeddr(t,r,k).*ei(y,t,r,k));
+ee2=@(y,t,r,k) sum(ddedrdk(t,r,k).*ei(y,t,r,k));
+ee3=@(y,t,r,k) sum(ddeddk(t,r,k).*ei(y,t,r,k));
+ee=@(y,t,r,k) [ee1(y,t,r,k) ee2(y,t,r,k); ee2(y,t,r,k) ee3(y,t,r,k)];
+eee=@(r,k) ee(y,t,r,k);
+hgr=@(r,k) j(r,k)'*j(r,k) + eee(r,k);   %the Hessian Matrix
+
+%% Implementing the Newton-Raphson Update
+tt(:,1) = [0.1; 1024]; %Starting values
+
+i=1;
+while i<101
+    tt(:,i+1) = tt(:,i) - (inv(hgr(tt(1,i),tt(2,i))))*gr(tt(1,i),tt(2,i));
+    if norm(tt(:,i+1) - tt(:,i))>1e-6
+        i=i+1;
+        %display(i)
+        %display(g(tt(1,i),tt(2,i)))
+    else
+        break
+    end
+end
