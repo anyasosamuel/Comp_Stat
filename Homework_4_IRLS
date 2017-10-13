@@ -1,0 +1,78 @@
+%% Implementing the Iterated Reweighted Least Squares Method
+
+close all; clear all;
+
+%% Expressing the variables
+% Anyaso-Samuel_data_HW4_1.mat must be in current directory or else code
+% won't run
+m = load('Anyaso-Samuel_data_HW4_1.mat', 'm');
+y = load('Anyaso-Samuel_data_HW4_1.mat', 'y');
+z1 = load('Anyaso-Samuel_data_HW4_1.mat', 'z1');
+z2 = load('Anyaso-Samuel_data_HW4_1.mat', 'z2');
+m = m.m;    %Column vector; number of trials
+y = y.y;    %Response variable
+z0=ones(500,1);    %Column vector of ones; first predictor variable
+z1 = z1.z1; %Second predictor variable
+z2 = z2.z2; %Third variable
+z = [z0, z1, z2];   %Z Matrix
+n=500;
+
+pi_= ((y+1)./(m+1));
+pi_(pi_==0)=1e-6;
+pi_(pi_==1)=1-1e-6;
+pp = log(pi_./(1-pi_));
+    
+b = z\pp;
+n_pi =@(b0,b1,b2) 1./(1+exp(-(b0+(b1.*(z1))+(b2.*(z2)))));  %New Pi
+bb =@(b0,b1,b2) (-1)*(log(1-n_pi(b0,b1,b2)));
+
+u =@(b0,b1,b2) m.*n_pi(b0,b1,b2);   %mean
+w =@(b0,b1,b2) diag((m.*n_pi(b0,b1,b2)).*(1-n_pi(b0,b1,b2)));
+
+%% Deriving the Log likelihood, Gradient and Hessian
+l =@(b0,b1,b2) (((y')*z)*[b0;b1;b2]) - ((bb(b0,b1,b2)')*m);    %log likelihood function
+lp =@(b0,b1,b2) (z')*(y-u(b0,b1,b2));  %the Gradient
+h =@(b0,b1,b2) -(z')*(w(b0,b1,b2))*(z); %the Hessian
+e=@(b0,b1,b2) y - u(b0,b1,b2);
+x=@(b0,b1,b2) (z*[b0;b1;b2]) + (inv(w(b0,b1,b2))*(e(b0,b1,b2)));
+
+
+%% Implementing the IRLS
+bbb(:,1) = [b(1,1); b(2,1); b(3,1)];
+i = 1;
+while i<101
+    bbb(:,i+1) = (inv((z')*(w(bbb(1,i),bbb(2,i),bbb(3,i)))*(z)))*(z')*(w(bbb(1,i),bbb(2,i),bbb(3,i)))*(x(bbb(1,i),bbb(2,i),bbb(3,i)));
+    if norm(bbb(:,i+1)-bbb(:,i))>1e-6
+        i=i+1;
+    else
+        break
+    end
+end
+
+%% Plot probability funciton
+figure(1)
+pi_function =@(zz1,zz2) 1./(1+exp(-(bbb(1,end)+bbb(2,end)*zz1+bbb(3,end)*zz2)));    %fitted probability
+fsurf(pi_function,[-1 1 -1 1])
+hold on
+scatter3(z1,z2,y./m,'bo')
+hold off
+
+%% Plot objective function
+lll=zeros(6,1);
+for j=1:6
+    lll(j,1) = l(bbb(1,j), bbb(2,j), bbb(3,j));
+end
+
+xxx=[1,2,3,4,5,6];
+
+figure(2)
+hold on
+plot(xxx,lll,'k-','LineWidth',1)
+xlabel('$itr$','Interpreter','Latex','fontsize',12)
+ylabel('$l(B)$','Interpreter','Latex','fontsize',12)
+plot(1,l(bbb(1,1), bbb(2,1), bbb(3,1)),'o','MarkerEdgeColor','none','MarkerFaceColor','k')
+plot(2,l(bbb(1,2), bbb(2,2), bbb(3,2)),'o','MarkerEdgeColor','none','MarkerFaceColor','k')
+plot(3,l(bbb(1,3), bbb(2,3), bbb(3,3)),'o','MarkerEdgeColor','none','MarkerFaceColor','k')
+plot(4,l(bbb(1,4), bbb(2,4), bbb(3,4)),'o','MarkerEdgeColor','none','MarkerFaceColor','k')
+plot(5,l(bbb(1,5), bbb(2,5), bbb(3,5)),'o','MarkerEdgeColor','none','MarkerFaceColor','k')
+plot(6,l(bbb(1,6), bbb(2,6), bbb(3,6)),'o','MarkerEdgeColor','none','MarkerFaceColor','k')
