@@ -1,0 +1,73 @@
+%% Problem 2.1d
+clear all; close all;
+
+%Initialize and compute log likelihood function for plotting
+x = [1.77, -0.23, 2.76, 3.80, 3.47, 56.75, -1.34, 4.24, -2.44, 3.29, ...
+    3.71, -2.40, 4.53, -0.07, -1.05, -13.87, -2.53, -1.75, 0.27, 43.21];
+n = 500;
+tht = linspace(-65,65,n);
+l1 = zeros(n,1);
+for i =1:n
+    l1(i) = -20*log(pi)-sum(log(1+(x-tht(i)).^2));
+end
+
+%Set up required functions
+l = @(theta) -20*log(pi)-sum(log(1+(x-theta).^2));
+lp = @(theta) sum(2*(x-theta)./(1+(x-theta).^2));
+
+%% Secant method run 1
+
+%Set up parameters and starting values
+tht1(1) = -2; 
+tht1(2) = -1;
+i=1;
+epsilon = 1e-6;
+
+%Secant method with relative convergence criterion
+while i<1000
+    tht1(i+2) = tht1(i+1) - lp(tht1(i+1))*...
+        (tht1(i+1)-tht1(i))/(lp(tht1(i+1))-lp(tht1(i)));
+    if abs(tht1(i+2)-tht1(i+1))/abs(tht1(i+1)) > epsilon
+        i = i+1;
+    else
+        break
+    end
+end
+
+%% Secant method run 2
+
+%Set up parameters and starting values
+tht2(1) = -3; 
+tht2(2) = 3;
+i=1;
+epsilon = 1e-6;
+
+%Secant method with relative convergence criterion
+while i<1000
+    tht2(i+2) = tht2(i+1) - lp(tht2(i+1))*...
+        (tht2(i+1)-tht2(i))/(lp(tht2(i+1))-lp(tht2(i)));
+    if abs(tht2(i+2)-tht2(i+1))/abs(tht2(i+1)) > epsilon
+        i = i+1;
+    else
+        break
+    end
+end
+
+%% Secant method run 3
+
+%Set up parameters and starting values
+tht3(1) =2; 
+tht3(2) = 7;
+i=1;
+epsilon = 1e-6;
+
+%Secant method with relative convergence criterion
+while i<1000
+    tht3(i+2) = tht3(i+1) - lp(tht3(i+1))*...
+        (tht3(i+1)-tht3(i))/(lp(tht3(i+1))-lp(tht3(i)));
+    if abs(tht3(i+2)-tht3(i+1))/abs(tht3(i+1)) > epsilon
+        i = i+1;
+    else
+        break
+    end
+end
